@@ -8,7 +8,7 @@
 
 #import "SDAppDelegate.h"
 #import "SDNavigationController.h"
-#import "SDTableViewController.h"
+#import "SDViewController.h"
 
 @implementation SDAppDelegate
 
@@ -16,7 +16,7 @@
 {
     self.window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
     self.window.backgroundColor = [UIColor whiteColor];
-    SDNavigationController *nav = [[SDNavigationController alloc] initWithRootViewController:[[SDTableViewController alloc] init]];
+    SDNavigationController *nav = [[SDNavigationController alloc] initWithRootViewController:[[SDViewController alloc] init]];
     self.window.rootViewController = nav;
     [self.window makeKeyAndVisible];
     return YES;

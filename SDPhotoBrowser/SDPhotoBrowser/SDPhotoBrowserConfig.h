@@ -25,7 +25,7 @@ typedef enum {
 #define SDPhotoBrowserImageViewMargin 10
 
 // browser中显示图片动画时长
-#define SDPhotoBrowserShowImageAnimationDuration 0.8f
+#define SDPhotoBrowserShowImageAnimationDuration 0.5f
 
 // browser中显示图片动画时长
 #define SDPhotoBrowserHideImageAnimationDuration 0.8f
@@ -37,6 +37,6 @@ typedef enum {
 #define SDWaitingViewBackgroundColor [UIColor colorWithRed:0 green:0 blue:0 alpha:0.7]
 
 // 图片下载进度指示器内部控件间的间距
-#define SDWaitingViewItemMargin 10
+#define SDWaitingViewItemMargin 4
 
 

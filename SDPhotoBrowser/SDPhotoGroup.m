@@ -13,7 +13,7 @@
 
 #define SDPhotoGroupImageMargin 15
 
-@interface SDPhotoGroup () <SDPhotoBrowserDelegate>
+@interface SDPhotoGroup ()
 
 @end
 
@@ -69,11 +69,17 @@
 
 - (void)buttonClick:(UIButton *)button
 {
+    NSMutableArray *urlArray = [[NSMutableArray alloc] init];
+    
+    [self.photoItemArray enumerateObjectsUsingBlock:^(SDPhotoItem *obj, NSUInteger idx, BOOL *stop) {
+        NSString *urlStr = [obj.thumbnail_pic stringByReplacingOccurrencesOfString:@"thumbnail" withString:@"bmiddle"];
+        [urlArray addObject:urlStr];
+    }];
+
     SDPhotoBrowser *browser = [[SDPhotoBrowser alloc] init];
-    browser.sourceImagesContainerView = self; // 原图的父控件
-    browser.imageCount = self.photoItemArray.count; // 图片总数
+    browser.sourceImageContainerView = button; // 原图的父控件
+    browser.imageUrlArray = urlArray; // 图片总数
     browser.currentImageIndex = button.tag;
-    browser.delegate = self;
     [browser show];
     
 }

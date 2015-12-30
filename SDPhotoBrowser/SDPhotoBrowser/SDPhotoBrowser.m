@@ -9,19 +9,7 @@
 #import "SDPhotoBrowser.h"
 #import "UIImageView+WebCache.h"
 #import "SDBrowserImageView.h"
-
- 
-//  ============在这里方便配置样式相关设置===========
-
-//                      ||
-//                      ||
-//                      ||
-//                     \\//
-//                      \/
-
 #import "SDPhotoBrowserConfig.h"
-
-//  =============================================
 
 @implementation SDPhotoBrowser 
 {
@@ -33,8 +21,9 @@
     BOOL _willDisappear;
 }
 
-- (id)initWithFrame:(CGRect)frame
-{
+#pragma mark - Init
+
+- (id)initWithFrame:(CGRect)frame {
     self = [super initWithFrame:frame];
     if (self) {
         self.backgroundColor = SDPhotoBrowserBackgrounColor;
@@ -42,50 +31,48 @@
     return self;
 }
 
-
-- (void)didMoveToSuperview
-{
+- (void)didMoveToSuperview {
     [self setupScrollView];
-    
     [self setupToolbars];
 }
 
-- (void)dealloc
-{
+- (void)dealloc {
     [[UIApplication sharedApplication].keyWindow removeObserver:self forKeyPath:@"frame"];
 }
 
-- (void)setupToolbars
+- (void)layoutSubviews
 {
-    // 1. 序标
-    UILabel *indexLabel = [[UILabel alloc] init];
-    indexLabel.bounds = CGRectMake(0, 0, 80, 30);
-    indexLabel.textAlignment = NSTextAlignmentCenter;
-    indexLabel.textColor = [UIColor whiteColor];
-    indexLabel.font = [UIFont boldSystemFontOfSize:20];
-    indexLabel.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.5];
-    indexLabel.layer.cornerRadius = indexLabel.bounds.size.height * 0.5;
-    indexLabel.clipsToBounds = YES;
-    if (self.imageCount > 1) {
-        indexLabel.text = [NSString stringWithFormat:@"1/%ld", (long)self.imageCount];
-    }
-    _indexLabel = indexLabel;
-    [self addSubview:indexLabel];
+    [super layoutSubviews];
     
-    // 2.保存按钮
-    UIButton *saveButton = [[UIButton alloc] init];
-    [saveButton setTitle:@"保存" forState:UIControlStateNormal];
-    [saveButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
-    saveButton.backgroundColor = [UIColor colorWithRed:0.1f green:0.1f blue:0.1f alpha:0.90f];
-    saveButton.layer.cornerRadius = 5;
-    saveButton.clipsToBounds = YES;
-    [saveButton addTarget:self action:@selector(saveImage) forControlEvents:UIControlEventTouchUpInside];
-    _saveButton = saveButton;
-    [self addSubview:saveButton];
+    CGRect rect = self.bounds;
+    rect.size.width += SDPhotoBrowserImageViewMargin * 2;
+    
+    _scrollView.bounds = rect;
+    _scrollView.center = self.center;
+    
+    CGFloat y = 0;
+    CGFloat w = _scrollView.frame.size.width - SDPhotoBrowserImageViewMargin * 2;
+    CGFloat h = _scrollView.frame.size.height;
+    
+        [_scrollView.subviews enumerateObjectsUsingBlock:^(SDBrowserImageView *obj, NSUInteger idx, BOOL *stop) {
+        CGFloat x = SDPhotoBrowserImageViewMargin + idx * (SDPhotoBrowserImageViewMargin * 2 + w);
+        obj.frame = CGRectMake(x, y, w, h);
+    }];
+    
+    _scrollView.contentSize = CGSizeMake(_scrollView.subviews.count * _scrollView.frame.size.width, 0);
+    _scrollView.contentOffset = CGPointMake(self.currentImageIndex * _scrollView.frame.size.width, 0);
+    
+    if (!_hasShowedFistView) {
+        [self showFirstImage];
+    }
+    
+    _indexLabel.center = CGPointMake(self.bounds.size.width * 0.5, 35);
+    _saveButton.frame = CGRectMake(self.bounds.size.width - 50 - 20, self.bounds.size.height - 45, 50, 25);
 }
 
-- (void)saveImage
-{
+#pragma mark - Event Response
+
+- (void)saveImage {
     int index = _scrollView.contentOffset.x / _scrollView.bounds.size.width;
     UIImageView *currentImageView = _scrollView.subviews[index];
     
@@ -99,8 +86,7 @@
     [indicator startAnimating];
 }
 
-- (void)image:(UIImage *)image didFinishSavingWithError:(NSError *)error contextInfo:(void *)contextInfo;
-{
+- (void)image:(UIImage *)image didFinishSavingWithError:(NSError *)error contextInfo:(void *)contextInfo {
     [_indicatorView removeFromSuperview];
     
     UILabel *label = [[UILabel alloc] init];
@@ -122,8 +108,9 @@
     [label performSelector:@selector(removeFromSuperview) withObject:nil afterDelay:1.0];
 }
 
-- (void)setupScrollView
-{
+#pragma mark - Private Methods
+
+- (void)setupScrollView {
     _scrollView = [[UIScrollView alloc] init];
     _scrollView.delegate = self;
     _scrollView.showsHorizontalScrollIndicator = NO;
@@ -131,10 +118,10 @@
     _scrollView.pagingEnabled = YES;
     [self addSubview:_scrollView];
     
-    for (int i = 0; i < self.imageCount; i++) {
+    for (int i = 0; i < self.imageUrlArray.count; i++) {
         SDBrowserImageView *imageView = [[SDBrowserImageView alloc] init];
         imageView.tag = i;
-
+        
         // 单击图片
         UITapGestureRecognizer *singleTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(photoClick:)];
         
@@ -151,20 +138,44 @@
     }
     
     [self setupImageOfImageViewForIndex:self.currentImageIndex];
-    
 }
 
+- (void)setupToolbars {
+    // 1. 序标
+    UILabel *indexLabel = [[UILabel alloc] init];
+    indexLabel.bounds = CGRectMake(0, 0, 80, 30);
+    indexLabel.textAlignment = NSTextAlignmentCenter;
+    indexLabel.textColor = [UIColor whiteColor];
+    indexLabel.font = [UIFont boldSystemFontOfSize:20];
+    indexLabel.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.5];
+    indexLabel.layer.cornerRadius = indexLabel.bounds.size.height * 0.5;
+    indexLabel.clipsToBounds = YES;
+    if (self.imageUrlArray.count > 1) {
+        indexLabel.text = [NSString stringWithFormat:@"1/%ld", (long)self.imageUrlArray.count];
+    }
+    _indexLabel = indexLabel;
+    [self addSubview:indexLabel];
+    
+    // 2.保存按钮
+    UIButton *saveButton = [[UIButton alloc] init];
+    [saveButton setTitle:@"保存" forState:UIControlStateNormal];
+    [saveButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+    saveButton.backgroundColor = [UIColor colorWithRed:0.1f green:0.1f blue:0.1f alpha:0.90f];
+    saveButton.layer.cornerRadius = 5;
+    saveButton.clipsToBounds = YES;
+    [saveButton addTarget:self action:@selector(saveImage) forControlEvents:UIControlEventTouchUpInside];
+    _saveButton = saveButton;
+    [self addSubview:saveButton];
+}
+
+#pragma mark -
 // 加载图片
-- (void)setupImageOfImageViewForIndex:(NSInteger)index
-{
+- (void)setupImageOfImageViewForIndex:(NSInteger)index {
     SDBrowserImageView *imageView = _scrollView.subviews[index];
     self.currentImageIndex = index;
     if (imageView.hasLoadedImage) return;
-    if ([self highQualityImageURLForIndex:index]) {
-        [imageView setImageWithURL:[self highQualityImageURLForIndex:index] placeholderImage:[self placeholderImageForIndex:index]];
-    } else {
-        imageView.image = [self placeholderImageForIndex:index];
-    }
+    [imageView setImageWithURL:[NSURL URLWithString:self.imageUrlArray[index]]
+              placeholderImage:[UIImage imageNamed:self.placeHolderImageName]];
     imageView.hasLoadedImage = YES;
 }
 
@@ -176,8 +187,7 @@
     SDBrowserImageView *currentImageView = (SDBrowserImageView *)recognizer.view;
     NSInteger currentIndex = currentImageView.tag;
     
-    UIView *sourceView = self.sourceImagesContainerView.subviews[currentIndex];
-    CGRect targetTemp = [self.sourceImagesContainerView convertRect:sourceView.frame toView:self];
+    UIView *sourceView = _scrollView.subviews[currentIndex];
     
     UIImageView *tempView = [[UIImageView alloc] init];
     tempView.contentMode = sourceView.contentMode;
@@ -197,7 +207,7 @@
     _saveButton.hidden = YES;
     
     [UIView animateWithDuration:SDPhotoBrowserHideImageAnimationDuration animations:^{
-        tempView.frame = targetTemp;
+        tempView.frame = CGRectMake(0, 64, [UIScreen mainScreen].bounds.size.width, [UIScreen mainScreen].bounds.size.width * 9 / 16);
         self.backgroundColor = [UIColor clearColor];
         _indexLabel.alpha = 0.1;
     } completion:^(BOOL finished) {
@@ -216,41 +226,7 @@
     }
     
     SDBrowserImageView *view = (SDBrowserImageView *)recognizer.view;
-
     [view doubleTapToZommWithScale:scale];
-}
-
-- (void)layoutSubviews
-{
-    [super layoutSubviews];
-    
-    CGRect rect = self.bounds;
-    rect.size.width += SDPhotoBrowserImageViewMargin * 2;
-    
-    _scrollView.bounds = rect;
-    _scrollView.center = self.center;
-    
-    CGFloat y = 0;
-    CGFloat w = _scrollView.frame.size.width - SDPhotoBrowserImageViewMargin * 2;
-    CGFloat h = _scrollView.frame.size.height;
-    
-    
-    
-    [_scrollView.subviews enumerateObjectsUsingBlock:^(SDBrowserImageView *obj, NSUInteger idx, BOOL *stop) {
-        CGFloat x = SDPhotoBrowserImageViewMargin + idx * (SDPhotoBrowserImageViewMargin * 2 + w);
-        obj.frame = CGRectMake(x, y, w, h);
-    }];
-    
-    _scrollView.contentSize = CGSizeMake(_scrollView.subviews.count * _scrollView.frame.size.width, 0);
-    _scrollView.contentOffset = CGPointMake(self.currentImageIndex * _scrollView.frame.size.width, 0);
-    
-    
-    if (!_hasShowedFistView) {
-        [self showFirstImage];
-    }
-    
-    _indexLabel.center = CGPointMake(self.bounds.size.width * 0.5, 35);
-    _saveButton.frame = CGRectMake(30, self.bounds.size.height - 70, 50, 25);
 }
 
 - (void)show
@@ -272,47 +248,25 @@
     }
 }
 
-- (void)showFirstImage
-{
-    UIView *sourceView = self.sourceImagesContainerView.subviews[self.currentImageIndex];
-    CGRect rect = [self.sourceImagesContainerView convertRect:sourceView.frame toView:self];
+- (void)showFirstImage {
+    _hasShowedFistView = YES;
+    _scrollView.hidden = NO;
     
-    UIImageView *tempView = [[UIImageView alloc] init];
-    tempView.image = [self placeholderImageForIndex:self.currentImageIndex];
-    
+    UIView *tempView = [self.sourceImageContainerView snapshotViewAfterScreenUpdates:YES];
     [self addSubview:tempView];
     
-    CGRect targetTemp = [_scrollView.subviews[self.currentImageIndex] bounds];
-    
-    tempView.frame = rect;
+    tempView.frame = CGRectMake(0, 64, [UIScreen mainScreen].bounds.size.width, [UIScreen mainScreen].bounds.size.width * 9 / 16);
     tempView.contentMode = [_scrollView.subviews[self.currentImageIndex] contentMode];
     _scrollView.hidden = YES;
     
-    
     [UIView animateWithDuration:SDPhotoBrowserShowImageAnimationDuration animations:^{
         tempView.center = self.center;
-        tempView.bounds = (CGRect){CGPointZero, targetTemp.size};
+        tempView.bounds = (CGRect){CGPointZero, tempView.frame.size};
     } completion:^(BOOL finished) {
         _hasShowedFistView = YES;
         [tempView removeFromSuperview];
         _scrollView.hidden = NO;
     }];
-}
-
-- (UIImage *)placeholderImageForIndex:(NSInteger)index
-{
-    if ([self.delegate respondsToSelector:@selector(photoBrowser:placeholderImageForIndex:)]) {
-        return [self.delegate photoBrowser:self placeholderImageForIndex:index];
-    }
-    return nil;
-}
-
-- (NSURL *)highQualityImageURLForIndex:(NSInteger)index
-{
-    if ([self.delegate respondsToSelector:@selector(photoBrowser:highQualityImageURLForIndex:)]) {
-        return [self.delegate photoBrowser:self highQualityImageURLForIndex:index];
-    }
-    return nil;
 }
 
 #pragma mark - scrollview代理方法
@@ -337,7 +291,7 @@
     
     
     if (!_willDisappear) {
-        _indexLabel.text = [NSString stringWithFormat:@"%d/%ld", index + 1, (long)self.imageCount];
+        _indexLabel.text = [NSString stringWithFormat:@"%d/%ld", index + 1, (long)self.imageUrlArray.count];
     }
     [self setupImageOfImageViewForIndex:index];
 }

@@ -23,10 +23,10 @@
 {
     self = [super initWithFrame:frame];
     if (self) {
-        self.backgroundColor = SDWaitingViewBackgroundColor;
+        self.backgroundColor = [UIColor whiteColor];
         self.layer.cornerRadius = 5;
         self.clipsToBounds = YES;
-        self.mode = SDWaitingViewModeLoopDiagram;
+        self.mode = SDWaitingViewModePieDiagram;
     }
     return self;
 }
@@ -54,7 +54,7 @@
                 CGFloat radius = MIN(rect.size.width * 0.5, rect.size.height * 0.5) - SDWaitingViewItemMargin;
                 
                 
-                CGFloat w = radius * 2 + SDWaitingViewItemMargin;
+                CGFloat w = radius * 2 + SDWaitingViewItemMargin * 1.2;
                 CGFloat h = w;
                 CGFloat x = (rect.size.width - w) * 0.5;
                 CGFloat y = (rect.size.height - h) * 0.5;
