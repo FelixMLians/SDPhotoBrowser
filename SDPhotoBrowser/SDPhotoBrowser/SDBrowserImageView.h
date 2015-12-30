@@ -7,7 +7,7 @@
 //
 
 #import <UIKit/UIKit.h>
-#import "SDWaitingView.h"
+#import "CLProgressView.h"
 
 
 @interface SDBrowserImageView : UIImageView <UIGestureRecognizerDelegate>

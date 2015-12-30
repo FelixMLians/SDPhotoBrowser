@@ -12,7 +12,7 @@
 
 @implementation SDBrowserImageView
 {
-    __weak SDWaitingView *_waitingView;
+    __weak CLProgressView *_waitingView;
     BOOL _didCheckSize;
     UIScrollView *_scroll;
     UIImageView *_scrollImageView;
@@ -93,9 +93,8 @@
 
 - (void)setImageWithURL:(NSURL *)url placeholderImage:(UIImage *)placeholder
 {
-    SDWaitingView *waiting = [[SDWaitingView alloc] init];
-    waiting.bounds = CGRectMake(0, 0, 100, 100);
-    waiting.mode = SDWaitingViewProgressMode;
+    CLProgressView *waiting = [[CLProgressView alloc] initWithFrame:CGRectMake(0, 0, 60, 60)];
+    waiting.style = CLProgressViewDefaultStyle;
     _waitingView = waiting;
     [self addSubview:waiting];
     

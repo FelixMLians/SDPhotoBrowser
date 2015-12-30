@@ -6,12 +6,6 @@
 //  Copyright (c) 2015年 GSD. All rights reserved.
 //
 
-
-typedef enum {
-    SDWaitingViewModeLoopDiagram, // 环形
-    SDWaitingViewModePieDiagram // 饼型
-} SDWaitingViewMode;
-
 // 图片保存成功提示文字
 #define SDPhotoBrowserSaveImageSuccessText @" ^_^ 保存成功 ";
 
@@ -31,12 +25,6 @@ typedef enum {
 #define SDPhotoBrowserHideImageAnimationDuration 0.8f
 
 // 图片下载进度指示进度显示样式（SDWaitingViewModeLoopDiagram 环形，SDWaitingViewModePieDiagram 饼型）
-#define SDWaitingViewProgressMode SDWaitingViewModeLoopDiagram
-
-// 图片下载进度指示器背景色
-#define SDWaitingViewBackgroundColor [UIColor colorWithRed:0 green:0 blue:0 alpha:0.7]
-
-// 图片下载进度指示器内部控件间的间距
-#define SDWaitingViewItemMargin 4
+#define CLProgressViewDefaultStyle CLProgressViewStylePieDiagram
 
 
