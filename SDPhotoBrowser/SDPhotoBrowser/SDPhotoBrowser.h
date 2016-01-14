@@ -14,6 +14,7 @@
 @property (nonatomic, assign) NSInteger currentImageIndex;
 @property (nonatomic, copy) NSString *placeHolderImageName;
 @property (nonatomic, strong) UIImageView *sourceImageContainerView;
+@property (nonatomic, assign) CGRect originalViewFrame;
 
 - (void)show;
 

@@ -179,42 +179,6 @@
     imageView.hasLoadedImage = YES;
 }
 
-- (void)photoClick:(UITapGestureRecognizer *)recognizer
-{
-    _scrollView.hidden = YES;
-    _willDisappear = YES;
-    
-    SDBrowserImageView *currentImageView = (SDBrowserImageView *)recognizer.view;
-    NSInteger currentIndex = currentImageView.tag;
-    
-    UIView *sourceView = _scrollView.subviews[currentIndex];
-    
-    UIImageView *tempView = [[UIImageView alloc] init];
-    tempView.contentMode = sourceView.contentMode;
-    tempView.clipsToBounds = YES;
-    tempView.image = currentImageView.image;
-    CGFloat h = (self.bounds.size.width / currentImageView.image.size.width) * currentImageView.image.size.height;
-    
-    if (!currentImageView.image) { // 防止 因imageview的image加载失败 导致 崩溃
-        h = self.bounds.size.height;
-    }
-    
-    tempView.bounds = CGRectMake(0, 0, self.bounds.size.width, h);
-    tempView.center = self.center;
-    
-    [self addSubview:tempView];
-
-    _saveButton.hidden = YES;
-    
-    [UIView animateWithDuration:SDPhotoBrowserHideImageAnimationDuration animations:^{
-        tempView.frame = CGRectMake(0, 64, [UIScreen mainScreen].bounds.size.width, [UIScreen mainScreen].bounds.size.width * 9 / 16);
-        self.backgroundColor = [UIColor clearColor];
-        _indexLabel.alpha = 0.1;
-    } completion:^(BOOL finished) {
-        [self removeFromSuperview];
-    }];
-}
-
 - (void)imageViewDoubleTaped:(UITapGestureRecognizer *)recognizer
 {
     SDBrowserImageView *imageView = (SDBrowserImageView *)recognizer.view;
@@ -255,7 +219,7 @@
     UIView *tempView = [self.sourceImageContainerView snapshotViewAfterScreenUpdates:YES];
     [self addSubview:tempView];
     
-    tempView.frame = CGRectMake(0, 64, [UIScreen mainScreen].bounds.size.width, [UIScreen mainScreen].bounds.size.width * 9 / 16);
+    tempView.frame = self.originalViewFrame;
     tempView.contentMode = [_scrollView.subviews[self.currentImageIndex] contentMode];
     _scrollView.hidden = YES;
     
@@ -266,6 +230,42 @@
         _hasShowedFistView = YES;
         [tempView removeFromSuperview];
         _scrollView.hidden = NO;
+    }];
+}
+
+- (void)photoClick:(UITapGestureRecognizer *)recognizer
+{
+    _scrollView.hidden = YES;
+    _willDisappear = YES;
+    
+    SDBrowserImageView *currentImageView = (SDBrowserImageView *)recognizer.view;
+    NSInteger currentIndex = currentImageView.tag;
+    
+    UIView *sourceView = _scrollView.subviews[currentIndex];
+    
+    UIImageView *tempView = [[UIImageView alloc] init];
+    tempView.contentMode = sourceView.contentMode;
+    tempView.clipsToBounds = YES;
+    tempView.image = currentImageView.image;
+    CGFloat h = (self.bounds.size.width / currentImageView.image.size.width) * currentImageView.image.size.height;
+    
+    if (!currentImageView.image) { // 防止 因imageview的image加载失败 导致 崩溃
+        h = self.bounds.size.height;
+    }
+    
+    tempView.bounds = CGRectMake(0, 0, self.bounds.size.width, h);
+    tempView.center = self.center;
+    
+    [self addSubview:tempView];
+    
+    _saveButton.hidden = YES;
+    
+    [UIView animateWithDuration:SDPhotoBrowserHideImageAnimationDuration animations:^{
+        tempView.frame = self.originalViewFrame;
+        self.backgroundColor = [UIColor clearColor];
+        _indexLabel.alpha = 0.1;
+    } completion:^(BOOL finished) {
+        [self removeFromSuperview];
     }];
 }
 

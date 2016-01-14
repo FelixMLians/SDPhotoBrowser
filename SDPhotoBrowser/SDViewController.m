@@ -52,6 +52,7 @@ static NSString *kPlaceholderImageString = @"placeHolder.png";
     browser.sourceImageContainerView = self.topSlideView.imageViews[index]; // 原图的父控件
     browser.imageUrlArray = networkImages; // 图片总数
     browser.currentImageIndex = index;
+    browser.originalViewFrame = self.topSlideView.frame;
     [browser show];
 }
 
