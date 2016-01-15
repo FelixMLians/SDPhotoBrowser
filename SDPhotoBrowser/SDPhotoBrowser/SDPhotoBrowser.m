@@ -222,10 +222,11 @@
     tempView.frame = self.originalViewFrame;
     tempView.contentMode = [_scrollView.subviews[self.currentImageIndex] contentMode];
     _scrollView.hidden = YES;
+    CGFloat h = (self.bounds.size.width / self.sourceImageContainerView.image.size.width) * self.sourceImageContainerView.image.size.height;
     
     [UIView animateWithDuration:SDPhotoBrowserShowImageAnimationDuration animations:^{
         tempView.center = self.center;
-        tempView.bounds = (CGRect){CGPointZero, tempView.frame.size};
+        tempView.bounds = CGRectMake(0, 0, self.bounds.size.width, h);
     } completion:^(BOOL finished) {
         _hasShowedFistView = YES;
         [tempView removeFromSuperview];
